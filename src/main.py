@@ -6,6 +6,7 @@ import threading
 import socket
 import json
 import logging
+from services import DataServices
 
 HTTP_PORT = 3000
 HTTP_HOST = '0.0.0.0'
@@ -47,6 +48,10 @@ class HttpHandler(BaseHTTPRequestHandler):
         pr_url = urllib.parse.urlparse(self.path)
         file_type = pr_url.path.split('.')[-1]
         file_base_path = "style" if file_type == 'css' else "public"
+        file_path = f'{file_base_path}{self.path}'
+        if not pathlib.Path(file_path).exists():
+            self.send_html_file('templates/error.html', 404)
+            return
         self.send_response(200)
         mt = mimetypes.guess_type(self.path)
         if mt:
@@ -54,15 +59,21 @@ class HttpHandler(BaseHTTPRequestHandler):
         else:
             self.send_header("Content-type", 'text/plain')
         self.end_headers()
-        with open(f'{file_base_path}{self.path}', 'rb') as file:
+        with open(file_path, 'rb') as file:
             self.wfile.write(file.read())
 
 def save_data_from_form(data):
     data_parse = urllib.parse.unquote_plus(data.decode())
     data_dict = {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}
     try:
-        with open('storage/data.json', 'w', encoding='utf-8') as fd:
-            json.dump(data_dict, fd, ensure_ascii=False, indent=4)
+        data_services = DataServices()
+        data_json = data_services.get_init_data()
+        logging.debug(f'Data json: {data_json}')
+        logging.debug(f'Data dict: {data_dict}')
+        data_json.append(data_dict)
+        logging.debug(f'Data json: {data_json}')
+        logging.debug(f'Data dict: {data_dict}')
+        data_services.save_data(data_json)
     except ValueError as e:
         print(f'Error: {e}')
     except Exception as e:
