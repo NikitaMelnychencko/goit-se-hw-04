@@ -69,7 +69,7 @@ def save_data_from_form(data):
     try:
         data_services = DataServices()
         data_json = data_services.get_init_data()
-        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         data_dict["created_at"] = time_now
         data_json[time_now] = data_dict
         data_services.save_data(data_json)
