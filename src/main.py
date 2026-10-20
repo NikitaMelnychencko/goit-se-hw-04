@@ -7,6 +7,7 @@ import socket
 import json
 import logging
 from services import DataServices
+from datetime import datetime
 
 HTTP_PORT = 3000
 HTTP_HOST = '0.0.0.0'
@@ -68,11 +69,9 @@ def save_data_from_form(data):
     try:
         data_services = DataServices()
         data_json = data_services.get_init_data()
-        logging.debug(f'Data json: {data_json}')
-        logging.debug(f'Data dict: {data_dict}')
-        data_json.append(data_dict)
-        logging.debug(f'Data json: {data_json}')
-        logging.debug(f'Data dict: {data_dict}')
+        time_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data_dict["created_at"] = time_now
+        data_json[time_now] = data_dict
         data_services.save_data(data_json)
     except ValueError as e:
         print(f'Error: {e}')

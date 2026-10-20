@@ -9,12 +9,12 @@ class DataServices:
 
     def get_init_data(self):
         if not self.path.exists():
-            return []
+            return {}
         try:
             with open(self.path, "r", encoding="utf-8") as file:
                 return json.load(file)
         except (json.JSONDecodeError, EOFError, FileNotFoundError):
-            return []
+            return {}
 
     def save_data(self, data):
         with open(self.path, "w", encoding="utf-8" ) as file:
