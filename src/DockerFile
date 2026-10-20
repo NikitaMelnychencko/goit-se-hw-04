@@ -1,0 +1,28 @@
+# Base image: Linux with Python 3.13 (same minor line as pyproject.toml)
+FROM python:3.13-slim
+EXPOSE 3000
+
+# Set environment variables
+ENV APP_HOME=/app
+ENV PYTHONUNBUFFERED=1
+
+# Set the working directory inside the container
+WORKDIR $APP_HOME
+
+# Install dependencies inside the container
+COPY pyproject.toml $APP_HOME/pyproject.toml
+COPY poetry.lock $APP_HOME/poetry.lock
+RUN pip install --upgrade pip
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+# Install the dependencies listed in pyproject.toml
+RUN poetry install --no-root
+
+# Copy the remaining project files into the working directory
+COPY . .
+
+# App opens templates/, style/ and storage/ relative to the current directory
+WORKDIR $APP_HOME/src
+
+# Start the application inside the container
+CMD ["python", "main.py"]
